@@ -1,0 +1,12 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+HypergraphSignals = "c115e4b6-f67f-469c-90f0-6e8e9b5d57d9"
+LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
+
+[sources]
+HypergraphSignals = {path = ".."}
+
+[compat]
+Documenter = "1.13"
+LiveServer = "1.5"
+julia = "1.11"

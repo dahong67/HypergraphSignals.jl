@@ -2,3 +2,9 @@ name = "HypergraphSignals"
 uuid = "c115e4b6-f67f-469c-90f0-6e8e9b5d57d9"
 version = "0.1.0"
 authors = ["David Hong <hong@udel.edu>, Isabel Cano <isabelc@udel.edu>, and contributors"]
+
+[workspace]
+projects = ["test"]
+
+[compat]
+julia = "1.10"

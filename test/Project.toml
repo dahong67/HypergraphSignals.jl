@@ -1,0 +1,11 @@
+[deps]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
+HypergraphSignals = "c115e4b6-f67f-469c-90f0-6e8e9b5d57d9"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
+
+[compat]
+Aqua = "0.8.14"
+ExplicitImports = "1.14.0"
+TestItemRunner = "1.1.4"
