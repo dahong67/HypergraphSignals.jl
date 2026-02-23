@@ -2,7 +2,7 @@ module HypergraphSignals
 
 using Combinatorics, NPZ
 using FFTW, LinearAlgebra
-using GCPDecomposition
+using GCPDecompositions
 
 function hyperedges_to_incidence_jl(hyperedges; num_nodes = nothing, one_based = true)
     if isempty(hyperedges)
