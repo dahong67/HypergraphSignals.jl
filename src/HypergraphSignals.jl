@@ -2,6 +2,7 @@ module HypergraphSignals
 
 using Combinatorics, NPZ
 using FFTW, LinearAlgebra
+using GCPDecompositions
 
 function hyperedges_to_incidence_jl(hyperedges; num_nodes = nothing, one_based = true)
     if isempty(hyperedges)
@@ -166,7 +167,10 @@ function anti_symmetric_jl(As)
     return As
 end
 
-function t_mult_jl(A, B)
+function t_mult_jl(A, x)
+    M = ndims(A)
+    x_signal = HypergraphSignal_jl(reshape(x, :, 1), M)
+    B = symmetric_jl(x_signal)
     p = ndims(A)
     if size(A)[3:end] != size(B)[3:end]
         println("Trailing dimensions must match.")
@@ -201,6 +205,18 @@ function t_mult_jl(A, B)
     end
 
     return C
+end
+
+function t_shift(As::SparseArrayCOO, x)
+    xb = [0; x / 2; reverse(x / 2)]
+    lam = As.vals .* x[getindex.(As.inds, 2)]
+    F1 = convert.(Float64, I(size(As, 1))[:, getindex.(As.inds, 1)])
+    F2 = ones(1, numstored(As))
+    Frest = [
+        stack(circshift(xb, As.inds[k][j] - 1) for k in 1:numstored(As)) for
+        j in 3:ndims(As)
+    ]
+    return CPD(lam, (F1, F2, Frest...))
 end
 
 function t_eig_jl(A; order = "LR", full_output = false)
