@@ -59,9 +59,9 @@ function load_traffic_hypergraph_jl(file_path, ; M)
     end
     hyperedges = [sort(collect(edge)) for edge in hyperedge_sets]
 
-    H = hyperedges_to_incidence_jl(hyperedges; num_nodes = N, one_based = true)
+    # H = hyperedges_to_incidence_jl(hyperedges; num_nodes = N, one_based = true)
 
-    return H
+    return hyperedges, N
 end
 
 function adjacency(H_jl, N_jl, M_jl, E_jl)
@@ -82,6 +82,7 @@ function generate_perms(lst, M)
     if length(lst) == M
         return collect(permutations(lst))
     else
+        lst = collect(lst)
         c = length(lst)
         M_minus_c = M - c
 
@@ -326,6 +327,46 @@ function t_tran_jl(A)
         At[fill(:, ndims(A) - 1)..., i] = tran(selectdim(A, ndims(A), i))
     end
     return At
+end
+
+function symmetric_sparce_tensor(hyperedges, N, M)
+    L = 2*N + 1 
+ 
+    # Tensor shape: (N, N, L, L, …, L)  — M modes total
+    dims = ntuple(i -> i <= 2 ? N : L, M)
+    indxs = NTuple{M, Int}[]   
+    vals = Float64[]          
+ 
+    n_tail = M - 2       
+    n_mirror = 2^n_tail       
+ 
+    for e in hyperedges
+        perms = generate_perms(e, M)
+        base_weight = length(e)/length(perms)
+        split_val   = base_weight / n_mirror   # weight per entry
+ 
+        for perm in perms
+            i1 = perm[1]
+            i2 = perm[2]
+            tail = perm[3:end]  
+ 
+            fwd = [k + 1          for k in tail]   
+            bwd = [(2*N + 2) - k  for k in tail] 
+ 
+            # Enumerate all 2^n_tail combinations of {fwd, bwd} using a bitmask: bit t == 0 → forward, bit t == 1 → backward
+            for mask in 0:(n_mirror - 1)
+                tail_coords = ntuple(n_tail) do t
+                    (mask >> (t-1)) & 1 == 0 ? fwd[t] : bwd[t]
+                end
+                coord = (i1, i2, tail_coords...) 
+                push!(indxs, coord)
+                push!(vals, split_val)
+            end
+        end
+    end
+
+    As_sparse = SparseArrayCOO(dims, indxs, vals)
+    return As_sparse
 end
 
 end
