@@ -330,35 +330,35 @@ function t_tran_jl(A)
 end
 
 function symmetric_sparse_tensor(hyperedges, N, M)
-    L = 2*N + 1 
- 
+    L = 2 * N + 1
+
     # Tensor shape: (N, N, L, L, …, L)  — M modes total
     dims = ntuple(i -> i <= 2 ? N : L, M)
-    indxs = NTuple{M, Int}[]   
-    vals = Float64[]          
- 
-    n_tail = M - 2       
-    n_mirror = 2^n_tail       
- 
+    indxs = NTuple{M,Int}[]
+    vals = Float64[]
+
+    n_tail = M - 2
+    n_mirror = 2^n_tail
+
     for e in hyperedges
-        perms = generate_perms(e, M)
-        base_weight = length(e)/length(perms)
+        perms       = generate_perms(e, M)
+        base_weight = length(e) / length(perms)
         split_val   = base_weight / n_mirror   # weight per entry
- 
+
         for perm in perms
             i1 = perm[1]
             i2 = perm[2]
-            tail = perm[3:end]  
- 
-            fwd = [k + 1          for k in tail]   
-            bwd = [(2*N + 2) - k  for k in tail] 
- 
+            tail = perm[3:end]
+
+            fwd = [k + 1 for k in tail]
+            bwd = [(2 * N + 2) - k for k in tail]
+
             # Enumerate all 2^n_tail combinations of {fwd, bwd} using a bitmask: bit t == 0 → forward, bit t == 1 → backward
-            for mask in 0:(n_mirror - 1)
+            for mask in 0:(n_mirror-1)
                 tail_coords = ntuple(n_tail) do t
-                    (mask >> (t-1)) & 1 == 0 ? fwd[t] : bwd[t]
+                    return (mask >> (t - 1)) & 1 == 0 ? fwd[t] : bwd[t]
                 end
-                coord = (i1, i2, tail_coords...) 
+                coord = (i1, i2, tail_coords...)
                 push!(indxs, coord)
                 push!(vals, split_val)
             end
@@ -370,9 +370,9 @@ function symmetric_sparse_tensor(hyperedges, N, M)
 end
 
 function adjacency_sparse(hyperedges, N, M)
-    H = hyperedges_to_incidence_jl(hyperedges, num_nodes = N)
-    dims = ntuple(_ -> N, M)
-    indxs = NTuple{M, Int}[]
+    H     = hyperedges_to_incidence_jl(hyperedges; num_nodes = N)
+    dims  = ntuple(_ -> N, M)
+    indxs = NTuple{M,Int}[]
     vals  = Float64[]
 
     for e in 1:N
