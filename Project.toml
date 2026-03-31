@@ -7,14 +7,18 @@ authors = ["David Hong <hong@udel.edu>, Isabel Cano <isabelc@udel.edu>, and cont
 projects = ["test"]
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+GCPDecompositions = "f59fb95b-1bc8-443b-b347-5e445a549f37"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 
 [compat]
+BenchmarkTools = "1.6.3"
 Combinatorics = "1.1.0"
 FFTW = "1.10.0"
+GCPDecompositions = "0.3.1"
 LinearAlgebra = "1.12.0"
 NPZ = "0.4.3"
 julia = "1.10"
