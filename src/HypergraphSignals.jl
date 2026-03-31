@@ -375,7 +375,7 @@ function adjacency_sparse(hyperedges, N, M)
     indxs = NTuple{M,Int}[]
     vals  = Float64[]
 
-    for e in 1:N
+    for e in 1:size(H,2)
         location = findall(!iszero, H[:, e])
         all_perms = generate_perms(location, M)
         num_perms = length(all_perms)
