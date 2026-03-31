@@ -329,7 +329,7 @@ function t_tran_jl(A)
     return At
 end
 
-function symmetric_sparce_tensor(hyperedges, N, M)
+function symmetric_sparse_tensor(hyperedges, N, M)
     L = 2*N + 1 
  
     # Tensor shape: (N, N, L, L, …, L)  — M modes total
@@ -367,6 +367,28 @@ function symmetric_sparce_tensor(hyperedges, N, M)
 
     As_sparse = SparseArrayCOO(dims, indxs, vals)
     return As_sparse
+end
+
+function adjacency_sparse(hyperedges, N, M)
+    H = hyperedges_to_incidence_jl(hyperedges, num_nodes = N)
+    dims = ntuple(_ -> N, M)
+    indxs = NTuple{M, Int}[]
+    vals  = Float64[]
+
+    for e in 1:N
+        location = findall(!iszero, H[:, e])
+        all_perms = generate_perms(location, M)
+        num_perms = length(all_perms)
+        c = length(location)
+        weight = c / num_perms
+
+        for perm in all_perms
+            push!(indxs, ntuple(i -> perm[i], M))
+            push!(vals, weight)
+        end
+    end
+
+    return SparseArrayCOO(dims, indxs, vals)
 end
 
 end
