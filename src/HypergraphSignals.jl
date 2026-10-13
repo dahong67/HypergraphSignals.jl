@@ -1,8 +1,10 @@
 module HypergraphSignals
 
-using Combinatorics, NPZ
-using FFTW, LinearAlgebra
-using GCPDecompositions
+using Combinatorics: combinations, permutations, with_replacement_combinations
+using FFTW: fft, fft!, ifft
+using GCPDecompositions: CPD, SparseArrayCOO, numstored
+using LinearAlgebra: Hermitian, I, diagm, eigen
+using NPZ: npzread
 
 function hyperedges_to_incidence_jl(hyperedges; num_nodes=nothing, one_based=true)
     if isempty(hyperedges)
