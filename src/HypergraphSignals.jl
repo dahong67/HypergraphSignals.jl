@@ -4,7 +4,7 @@ using Combinatorics, NPZ
 using FFTW, LinearAlgebra
 using GCPDecompositions
 
-function hyperedges_to_incidence_jl(hyperedges; num_nodes = nothing, one_based = true)
+function hyperedges_to_incidence_jl(hyperedges; num_nodes=nothing, one_based=true)
     if isempty(hyperedges)
         throw(ArgumentError("hyperedges cannot be empty"))
     end
@@ -68,7 +68,7 @@ function adjacency(H_jl, N_jl, M_jl, E_jl)
     A_jl = zeros(fill(N_jl, M_jl)...)
     for e in 1:E_jl
         location = findall(!iszero, H_jl[:, e])
-        all_perms = generate_perms(location, maximum(sum(H_jl; dims = 1)))
+        all_perms = generate_perms(location, maximum(sum(H_jl; dims=1)))
         num_perms = length(all_perms)
         c = length(location)
         for perm in all_perms
@@ -101,7 +101,7 @@ end
 
 function degree(H_jl, N_jl, M_jl)
     D_jl = zeros(fill(N_jl, M_jl)...)
-    d_jl = vec(sum(H_jl; dims = 2)) # degree of each nodes
+    d_jl = vec(sum(H_jl; dims=2)) # degree of each nodes
 
     for i in 1:N_jl
         idx = ntuple(_ -> i, M_jl)
@@ -118,7 +118,7 @@ function HypergraphSignal_jl(S::Matrix, M::Int)
     N, d = size(S)
     function one_dim_hypergraphsignal_jl(s::Vector, M::Int)
         X = s
-        for _ in 1:M-2
+        for _ in 1:(M-2)
             new_shape = (ones(Int, ndims(X))..., N)
             X = X .* reshape(s, new_shape...)
         end
@@ -127,7 +127,7 @@ function HypergraphSignal_jl(S::Matrix, M::Int)
     end
 
     results = [one_dim_hypergraphsignal_jl(S[:, i], M) for i in 1:d]
-    return cat(results...; dims = 2)
+    return cat(results...; dims=2)
 end
 
 function sym_step(A, i)
@@ -135,8 +135,8 @@ function sym_step(A, i)
     sz[i] = 1
     first_0 = zeros(eltype(A), sz...)
 
-    reverse_A = reverse(A; dims = i)
-    As = cat(first_0, A, reverse_A; dims = i)
+    reverse_A = reverse(A; dims=i)
+    As = cat(first_0, A, reverse_A; dims=i)
 
     return As ./ 2
 end
@@ -192,7 +192,7 @@ function t_mult_jl(A, x)
     flatten_B = reshape(B_fft, flatten_shape_B)
 
     slices = [flatten_A[:, :, k] * flatten_B[:, :, k] for k in 1:num_slices]
-    flatten_C = cat(slices...; dims = 3)
+    flatten_C = cat(slices...; dims=3)
 
     C = reshape(flatten_C, shape_C...)
 
@@ -220,7 +220,7 @@ function t_shift(As::SparseArrayCOO, x)
     return CPD(lam, (F1, F2, Frest...))
 end
 
-function t_eig_jl(A; order = "LR", full_output = false)
+function t_eig_jl(A; order="LR", full_output=false)
     if size(A, 1) != size(A, 2)
         error("Frontal slices must be square.")
     end
@@ -295,7 +295,7 @@ end
 
 function sorting_values_jl(values, vectors, order)
     if order == "LR"
-        idx = sortperm(values; rev = true)
+        idx = sortperm(values; rev=true)
     elseif order == "SR"
         idx = sortperm(values)
     else
@@ -324,7 +324,7 @@ function t_tran_jl(A)
     sz2[1], sz2[2] = sz[2], sz[1]
     At = zeros(ComplexF64, Tuple(sz2))
     for i in 1:sz[end]
-        At[fill(:, ndims(A) - 1)..., i] = tran(selectdim(A, ndims(A), i))
+        At[fill(:, ndims(A)-1)..., i] = tran(selectdim(A, ndims(A), i))
     end
     return At
 end
@@ -370,12 +370,12 @@ function symmetric_sparse_tensor(hyperedges, N, M)
 end
 
 function adjacency_sparse(hyperedges, N, M)
-    H     = hyperedges_to_incidence_jl(hyperedges; num_nodes = N)
+    H     = hyperedges_to_incidence_jl(hyperedges; num_nodes=N)
     dims  = ntuple(_ -> N, M)
     indxs = NTuple{M,Int}[]
     vals  = Float64[]
 
-    for e in 1:size(H,2)
+    for e in 1:size(H, 2)
         location = findall(!iszero, H[:, e])
         all_perms = generate_perms(location, M)
         num_perms = length(all_perms)
