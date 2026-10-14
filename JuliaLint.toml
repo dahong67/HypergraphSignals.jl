@@ -1,0 +1,7 @@
+preset = "strict"
+
+[[override]]
+paths = ["docs/**", "test/**"]
+
+[override.rules]
+bare_using = "off"
