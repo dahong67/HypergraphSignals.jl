@@ -1,4 +1,4 @@
-style = "minimal"
+style = "default"
 
 [options]
 always_for_in = true
