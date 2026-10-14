@@ -393,4 +393,9 @@ function adjacency_sparse(hyperedges, N, M)
     return SparseArrayCOO(dims, indxs, vals)
 end
 
+using Combinatorics: stirlings2
+export AdjacencyTensor, Hypergraph
+
+include("hypergraphs.jl")
+
 end
