@@ -394,8 +394,12 @@ function adjacency_sparse(hyperedges, N, M)
 end
 
 using Combinatorics: stirlings2
+using LinearAlgebra: eigen!, mul!, Diagonal, Symmetric
 export AdjacencyTensor, Hypergraph
+export tmul, tadjoint, teigen
+public ⋆
 
 include("hypergraphs.jl")
+include("t-algebra.jl")
 
 end
