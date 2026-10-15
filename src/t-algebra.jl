@@ -47,16 +47,23 @@ t-algebra transpose of dense tensor `A`.
 """
 function tadjoint(A::Array{T,M}) where {T<:Real,M}
     # Transpose each frontal slice
-    P = permutedims(A, (2, 1, 3:M...))
+    P = PermutedDimsArray(A, (2, 1, 3:M...))
 
-    # Reverse the transposed slices in place
-    revinds = ntuple(k -> k <= 2 ? (1:size(A, k)) : (2:size(A, k)), Val(M))
-    reverse!(view(P, revinds...); dims = (3:M...,))
+    # Reverse the transposed slices "centered" at the first slice
+    # (corresponds to circshift + reverse)
+    R = circshift(P, ntuple(k -> k <= 2 ? 0 : -1, Val(M)))
+    reverse!(R; dims = (3:M...,))
 
-    return P
+    return R
 end
 
 # TODO: does not agree with t_tran_jl for M >= 4, check if t_tran_jl correct
+# TODO: make this lazy instead like the usual transpose since we probably mostly
+#       need this for doing tmul, for which we could define the overload
+# TODO: note in devdocs that a nontrivial amount of the time is spent dealing
+#       with the permutation along the first two modes. this could also be
+#       addressed by returning a PermutedDimsArray at the end, but that just
+#       defers that computation - we'd likely hit it soon after in an fft call.
 
 """
     teigen(A::Array{T,M}) where {T<:Real,M}
