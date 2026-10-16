@@ -2,6 +2,7 @@ module HypergraphSignals
 
 # Imports
 using Combinatorics: stirlings2
+using Compat: @compat
 using FFTW: fft, ifft
 using LinearAlgebra: Diagonal, Symmetric, eigen!, mul!
 
@@ -12,7 +13,7 @@ export AdjacencyTensor, Hypergraph
 # t-algebra operations
 include("t-algebra.jl")
 export tadjoint, teigen, tmul
-public ⋆
+@compat public (⋆)
 
 # t-HGSP operations
 include("t-hgsp.jl")

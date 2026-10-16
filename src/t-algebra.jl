@@ -29,12 +29,12 @@ function tmul(A::Array{T,M}, B::Array{T,M}) where {T<:Real,M}
 end
 
 """
-    ⋆(A, B...)
+    ⋆(A, B)
 
-t-product of tensors implemented via `tmul`. Typed via `\\star<tab>`.
-Infix `A⋆B⋆C⋆...` calls `⋆(A, B...)`, which then calls `tmul`.
+t-product of tensors `A` and `B` (an alias for `tmul`). Typed via `\\star<tab>`.
+Infix `A⋆B⋆C` is left-associative, i.e., it computes `(A⋆B)⋆C`.
 """
-⋆ = tmul
+const ⋆ = tmul
 
 # TODO: time against python/matlab implementations
 # TODO: experiment more with pre-computing FFTW plans

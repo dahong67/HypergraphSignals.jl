@@ -54,7 +54,10 @@ end
     using HypergraphSignals: ⋆
 
     @test (⋆) === tmul
-    @test_broken isconst(HypergraphSignals, :⋆)
+    @test isconst(HypergraphSignals, :⋆)
+    if VERSION >= v"1.11-"  # public only declared on Julia 1.11+
+        @test Base.ispublic(HypergraphSignals, :⋆)
+    end
 
     A, B, C = randn(2, 3, 4), randn(3, 3, 4), randn(3, 2, 4)
     @test A ⋆ B ⋆ C ≈ tmul(tmul(A, B), C)
