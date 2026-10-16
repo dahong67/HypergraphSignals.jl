@@ -36,6 +36,8 @@ end
 @testitem "hgsignalfit" begin
     # Exact hypergraph signals are recovered up to sign
     y = randn(4)
+    @test hgsignalfit(y) == y
+    y = randn(4)
     @test hgsignalfit(reshape(y, 4, 1)) == y
     y = randn(4)
     ŷ = @test_logs (:warn, "M = 3 solution has ambiguous sign") hgsignalfit(
