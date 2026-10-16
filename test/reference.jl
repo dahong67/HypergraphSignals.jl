@@ -3,9 +3,7 @@
 @testmodule Ref begin
     using Combinatorics: combinations, permutations, with_replacement_combinations
     using FFTW: fft, fft!, ifft
-    using GCPDecompositions: CPD, SparseArrayCOO, numstored
     using LinearAlgebra: Hermitian, I, diagm, eigen
-    using NPZ: npzread
 
     function hyperedges_to_incidence_jl(hyperedges; num_nodes = nothing, one_based = true)
         if isempty(hyperedges)
@@ -35,36 +33,6 @@
         end
 
         return H
-    end
-
-    function load_traffic_hypergraph_jl(file_path, ; M)
-        data = npzread(file_path)
-
-        N = Int(data["N"])
-        W = data["W"]
-
-        A = (W .> 0) .| (transpose(W) .> 0)
-
-        hyperedge_sets = Set{Set{Int}}()
-
-        for v in 1:N
-            neighbors = findall(x -> x != 0, A[v, :])
-
-            size_neighbors = length(neighbors) + 1
-
-            if size_neighbors <= M
-                push!(hyperedge_sets, Set(vcat(v, neighbors)))
-            else
-                for subset in combinations(neighbors, M - 1)
-                    push!(hyperedge_sets, Set(vcat(v, subset)))
-                end
-            end
-        end
-        hyperedges = [sort(collect(edge)) for edge in hyperedge_sets]
-
-        # H = hyperedges_to_incidence_jl(hyperedges; num_nodes = N, one_based = true)
-
-        return hyperedges, N
     end
 
     function adjacency(H_jl, N_jl, M_jl, E_jl)
@@ -100,21 +68,6 @@
             end
             return final_lst
         end
-    end
-
-    function degree(H_jl, N_jl, M_jl)
-        D_jl = zeros(fill(N_jl, M_jl)...)
-        d_jl = vec(sum(H_jl; dims = 2)) # degree of each nodes
-
-        for i in 1:N_jl
-            idx = ntuple(_ -> i, M_jl)
-            D_jl[idx...] = d_jl[i]
-        end
-        return D_jl
-    end
-
-    function laplacian(H_jl, N_jl, M_jl, E_jl)
-        return degree(H_jl, N_jl, M_jl) - adjacency(H_jl, N_jl, M_jl, E_jl)
     end
 
     function HypergraphSignal_jl(S::Matrix, M::Int)
@@ -209,18 +162,6 @@
         end
 
         return C
-    end
-
-    function t_shift(As::SparseArrayCOO, x)
-        xb = [0; x / 2; reverse(x / 2)]
-        lam = As.vals .* x[getindex.(As.inds, 2)]
-        F1 = convert.(Float64, I(size(As, 1))[:, getindex.(As.inds, 1)])
-        F2 = ones(1, numstored(As))
-        Frest = [
-            stack(circshift(xb, As.inds[k][j] - 1) for k in 1:numstored(As)) for
-            j in 3:ndims(As)
-        ]
-        return CPD(lam, (F1, F2, Frest...))
     end
 
     function t_eig_jl(A; order = "LR", full_output = false)
@@ -330,67 +271,5 @@
             At[fill(:, ndims(A)-1)..., i] = tran(selectdim(A, ndims(A), i))
         end
         return At
-    end
-
-    function symmetric_sparse_tensor(hyperedges, N, M)
-        L = 2 * N + 1
-
-        # Tensor shape: (N, N, L, L, …, L)  — M modes total
-        dims = ntuple(i -> i <= 2 ? N : L, M)
-        indxs = NTuple{M,Int}[]
-        vals = Float64[]
-
-        n_tail = M - 2
-        n_mirror = 2^n_tail
-
-        for e in hyperedges
-            perms       = generate_perms(e, M)
-            base_weight = length(e) / length(perms)
-            split_val   = base_weight / n_mirror   # weight per entry
-
-            for perm in perms
-                i1 = perm[1]
-                i2 = perm[2]
-                tail = perm[3:end]
-
-                fwd = [k + 1 for k in tail]
-                bwd = [(2 * N + 2) - k for k in tail]
-
-                # Enumerate all 2^n_tail combinations of {fwd, bwd} using a bitmask: bit t == 0 → forward, bit t == 1 → backward
-                for mask in 0:(n_mirror-1)
-                    tail_coords = ntuple(n_tail) do t
-                        return (mask >> (t - 1)) & 1 == 0 ? fwd[t] : bwd[t]
-                    end
-                    coord = (i1, i2, tail_coords...)
-                    push!(indxs, coord)
-                    push!(vals, split_val)
-                end
-            end
-        end
-
-        As_sparse = SparseArrayCOO(dims, indxs, vals)
-        return As_sparse
-    end
-
-    function adjacency_sparse(hyperedges, N, M)
-        H     = hyperedges_to_incidence_jl(hyperedges; num_nodes = N)
-        dims  = ntuple(_ -> N, M)
-        indxs = NTuple{M,Int}[]
-        vals  = Float64[]
-
-        for e in 1:size(H, 2)
-            location = findall(!iszero, H[:, e])
-            all_perms = generate_perms(location, M)
-            num_perms = length(all_perms)
-            c = length(location)
-            weight = c / num_perms
-
-            for perm in all_perms
-                push!(indxs, ntuple(i -> perm[i], M))
-                push!(vals, weight)
-            end
-        end
-
-        return SparseArrayCOO(dims, indxs, vals)
     end
 end
