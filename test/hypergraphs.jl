@@ -14,8 +14,8 @@
     @test Hypergraph{4}(edges, 4) isa Hypergraph{4}
 
     # Validation
-    @test_throws ErrorException Hypergraph(edges, 3)
-    @test_throws ErrorException Hypergraph{2}(edges, 4)
+    @test_throws ArgumentError Hypergraph(edges, 3)
+    @test_throws ArgumentError Hypergraph{2}(edges, 4)
 
     # Non-Set input
     @test_broken Hypergraph{3}([[1, 2], [2, 3]], 3) isa Hypergraph{3}
@@ -57,10 +57,6 @@ end
 
     # Bounds checking
     A = AdjacencyTensor(Hypergraph(Set([Set([1, 2, 3])])))
-    @test_broken try
-        A[0, 0, 9]
-        false
-    catch err
-        err isa BoundsError
-    end
+    @test_throws BoundsError A[0, 0, 9]
+    @test_throws BoundsError A[1, 1, 4]
 end

@@ -18,10 +18,12 @@ struct Hypergraph{M}
     function Hypergraph{M}(hyperedges, nvertices) where {M}
         # Check consistency with nvertices and M
         for hyperedge in hyperedges
-            any(!in(1:nvertices), hyperedge) &&
-                error("Hyperedge $hyperedge has vertices outside of 1:$nvertices.")
-            length(hyperedge) > M &&
-                error("Hyperedge $hyperedge has cardinality greater than $M.")
+            any(!in(1:nvertices), hyperedge) && throw(
+                ArgumentError("Hyperedge $hyperedge has vertices outside of 1:$nvertices."),
+            )
+            length(hyperedge) > M && throw(
+                ArgumentError("Hyperedge $hyperedge has cardinality greater than $M."),
+            )
         end
         return new{M}(hyperedges, nvertices)
     end
@@ -56,6 +58,7 @@ end
 Base.size(A::AdjacencyTensor{M}) where {M} = ntuple(_ -> A.hypergraph.nvertices, Val(M))
 Base.IndexStyle(::Type{<:AdjacencyTensor}) = IndexCartesian()
 function Base.getindex(A::AdjacencyTensor{M}, I::Vararg{Int,M}) where {M}
+    @boundscheck checkbounds(A, I...)
     hyperedges = A.hypergraph.hyperedges
     hyperedge = Set(I)
     if hyperedge in hyperedges

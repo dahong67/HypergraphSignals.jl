@@ -7,9 +7,10 @@ t-product of dense tensors `A` and `B` implemented via FFT.
 """
 function tmul(A::Array{T,M}, B::Array{T,M}) where {T<:Real,M}
     # Check dims
-    M >= 2 || error("number of dims must be at least two")
-    size(A, 2) == size(B, 1) || error("size(A,2) must match size(B,1)")
-    size(A)[3:M] == size(B)[3:M] || error("size(A)[3:end] must match size(B)[3:end]")
+    M >= 2 || throw(ArgumentError("number of dims must be at least two"))
+    size(A, 2) == size(B, 1) || throw(DimensionMismatch("size(A,2) must match size(B,1)"))
+    size(A)[3:M] == size(B)[3:M] ||
+        throw(DimensionMismatch("size(A)[3:end] must match size(B)[3:end]"))
 
     # Compute FFTs
     Ah = fft(A, 3:M)
@@ -71,7 +72,7 @@ t-eigendecomposition of dense tensor `A` implemented via FFT.
 """
 function teigen(A::Array{T,M}; eigenargs...) where {T<:Real,M}
     # Check dims
-    size(A, 1) == size(A, 2) || error("size(A,1) must match size(A,2)")
+    size(A, 1) == size(A, 2) || throw(DimensionMismatch("size(A,1) must match size(A,2)"))
 
     # Compute FFT
     Ah = fft(A, 3:M)

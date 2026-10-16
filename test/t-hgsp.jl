@@ -40,12 +40,8 @@ end
     end
 
     # Bounds checking
-    @test_broken try
-        HGSignal(x, 3)[1, 5, 1]
-        false
-    catch err
-        err isa BoundsError
-    end
+    @test_throws BoundsError HGSignal(x, 3)[1, 2, 1]
+    @test_throws BoundsError HGSignal(x, 3)[5, 1, 1]
 end
 
 @testitem "hgsignalfit" begin
@@ -58,8 +54,9 @@ end
     )
     @test ŷ ≈ y || ŷ ≈ -y
 
-    @test_throws ErrorException hgsignalfit(randn(3, 2, 3))
-    @test_throws ErrorException hgsignalfit(Array(HGSignal(randn(3), 4)))
+    @test_throws DimensionMismatch hgsignalfit(randn(3, 2, 3))
+    @test_throws DimensionMismatch hgsignalfit(randn(3, 1, 4))
+    @test_throws ArgumentError hgsignalfit(Array(HGSignal(randn(3), 4)))
 end
 
 @testitem "hgshift / hgfilter" setup = [Reference] begin

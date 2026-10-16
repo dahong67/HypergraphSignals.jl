@@ -27,8 +27,9 @@
     end
 
     # Dimension checks
-    @test_throws ErrorException tmul(randn(2, 3, 4), randn(2, 3, 4))
-    @test_throws ErrorException tmul(randn(2, 3, 4), randn(3, 3, 5))
+    @test_throws DimensionMismatch tmul(randn(2, 3, 4), randn(2, 3, 4))
+    @test_throws DimensionMismatch tmul(randn(2, 3, 4), randn(3, 3, 5))
+    @test_throws ArgumentError tmul(randn(3), randn(3))
 
     # Matrices (M = 2)
     A, B = randn(2, 3), randn(3, 4)
@@ -114,6 +115,9 @@ end
         # Real eigenvalues, sorted consistently across slices
         @test_broken eltype(Λ) <: Real
     end
+
+    # Frontal slices must be square
+    @test_throws DimensionMismatch teigen(randn(2, 3, 4))
 
     # Non-t-self-adjoint tensors are not supported
     @test_broken try

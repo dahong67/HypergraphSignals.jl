@@ -82,8 +82,10 @@ end
 HGSignal(signal::Vector{T}, M) where {T<:Real} = HGSignal{T,M}(signal)
 Base.size(X::HGSignal{T,M}) where {T,M} = ntuple(k -> k == 2 ? 1 : length(X.signal), Val(M))
 Base.IndexStyle(::Type{<:HGSignal}) = IndexCartesian()
-Base.getindex(X::HGSignal{T,M}, I::Vararg{Int,M}) where {T,M} =
-    prod(X.signal[I[k]] for k in 1:M if k != 2)
+function Base.getindex(X::HGSignal{T,M}, I::Vararg{Int,M}) where {T,M}
+    @boundscheck checkbounds(X, I...)
+    return prod(X.signal[I[k]] for k in 1:M if k != 2)
+end
 
 # TODO: more efficient Array method using tensor kernels (if needed)
 
@@ -96,8 +98,9 @@ function hgsignalfit(X::Array{T,M}) where {T<:Real,M}
     N = size(X, 1)
 
     # Check dims
-    size(X, 2) != 1 && error("size(X,2) must equal one")
-    any(!=(N), size(X)[3:end]) && error("size(X)[3:end] must all match size(X,1)")
+    size(X, 2) != 1 && throw(DimensionMismatch("size(X,2) must equal one"))
+    any(!=(N), size(X)[3:end]) &&
+        throw(DimensionMismatch("size(X)[3:end] must all match size(X,1)"))
 
     # Handle different cases
     if M == 1        # just a signal vector
@@ -110,7 +113,7 @@ function hgsignalfit(X::Array{T,M}) where {T<:Real,M}
         λ, V = eigen!(Symmetric((Xr + Xr')/2))
         return sqrt(λ[end])*V[:, end]
     else             # M > 3 becomes a tensor eigenvalue problem
-        error("M > 3 not supported (yet!)")
+        throw(ArgumentError("M > 3 not supported (yet!)"))
     end
 end
 
