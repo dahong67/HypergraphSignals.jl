@@ -52,11 +52,13 @@ Don't worry if it takes a few minutes to complete.
 ## Step 3: Run HypergraphSignals
 
 Let's create a random hypergraph
-with ``N = 15`` vertices and hyperedges of cardinality at most ``M = 4``,
+with ``N = 15`` vertices and hyperedges of cardinality at most ``M = 3``,
 along with a random signal on its vertices!
+We seed the random number generator so the results are reproducible.
 
 ```@repl quickstart
-N, M = 15, 4
+using Random; Random.seed!(0);
+N, M = 15, 3
 hyperedges = Set(Set(rand(1:N, rand(2:M))) for _ in 1:1000);
 x = randn(N);    # semicolon suppresses the output
 ```
@@ -125,6 +127,23 @@ These can be computed with `teigen` and `tadjoint`.
 Λ, V = teigen(As);
 V ⋆ Λ ⋆ tadjoint(V) ≈ As
 ```
+
+Finally, to filter the signal ``x`` with the hypergraph,
+run `hgfilter`.
+This performs the t-HGSP shift above,
+anti-symmetrizes the output,
+then fits a hypergraph signal to the result,
+so we end up with a signal vector on the vertices again!
+
+```@repl quickstart
+y = hgfilter(A, x)
+```
+
+!!! note "Note: Current limitations of `hgfilter`"
+
+    Fitting the hypergraph signal is currently only supported for ``M \leq 3``.
+    For ``M = 3``, the fitted signal comes from a leading eigenvector,
+    so it is only determined up to sign (hence the warning).
 
 !!! tip "Congratulations!"
 
