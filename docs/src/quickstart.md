@@ -154,4 +154,4 @@ y = hgfilter(A, x)
 ## Next steps
 
 Ready to learn more?
-Check out the [API](@ref) for all the available types and functions.
+Check out the [API](@ref) page for all the available types and functions.

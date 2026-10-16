@@ -15,7 +15,7 @@ makedocs(;
     modules = [HypergraphSignals],
     authors = "David Hong <hong@udel.edu>, Isabel Cano <isabelc@udel.edu>, and contributors",
     sitename = "HypergraphSignals.jl",
-    pages = ["Home" => "index.md", "Quick start" => "quickstart.md"],
+    pages = ["Home" => "index.md", "Quick start" => "quickstart.md", "API" => "api.md"],
     format = Documenter.HTML(;
         canonical = "https://dahong67.github.io/HypergraphSignals.jl",
         edit_link = "main",

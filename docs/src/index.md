@@ -6,9 +6,3 @@ Documentation for [HypergraphSignals](https://github.com/dahong67/HypergraphSign
 > If you are interested in using it in your own research,
 > **we'd love to hear from you and collaborate!**
 > Feel free to write: [hong@udel.edu](mailto:hong@udel.edu)*
-
-## API
-
-```@autodocs
-Modules = [HypergraphSignals]
-```
