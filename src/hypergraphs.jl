@@ -6,6 +6,8 @@
 Form a hypergraph stored as a `Set` of hyperedges,
 each of which is a `Set` of at-most `M` vertex indices
 from `1:nvertices`.
+The hyperedges can be any collection of collections of vertex indices,
+and are copied into a new `Set{Set{Int}}`.
 
 # Fields
 - `hyperedges::Set{Set{Int}}`: set of hyperedges
@@ -16,6 +18,9 @@ struct Hypergraph{M}
     nvertices::Int
 
     function Hypergraph{M}(hyperedges, nvertices) where {M}
+        # Copy into a new set of sets
+        hyperedges = Set{Set{Int}}(Set{Int}(hyperedge) for hyperedge in hyperedges)
+
         # Check consistency with nvertices and M
         for hyperedge in hyperedges
             any(!in(1:nvertices), hyperedge) && throw(
@@ -30,13 +35,20 @@ struct Hypergraph{M}
 end
 
 """
-    Hypergraph(hyperedges::Set{Set{Int}}, nvertices = maximum(maximum, hyperedges))
+    Hypergraph(hyperedges, nvertices = maximum(maximum, hyperedges))
 
-Form a hypergraph from a set of hyperedges (each a set of vertex indices),
+Form a hypergraph from a collection of hyperedges (each a collection of vertex indices),
 where `nvertices` and the maximum cardinality are inferred.
+Use `Hypergraph{M}(hyperedges, nvertices)` when `hyperedges` is empty.
 """
-function Hypergraph(hyperedges::Set{Set{Int}}, nvertices = maximum(maximum, hyperedges))
-    M = maximum(length, hyperedges)
+function Hypergraph(hyperedges, nvertices = maximum(maximum, hyperedges; init = 0))
+    isempty(hyperedges) && throw(
+        ArgumentError(
+            "Cannot infer the maximum cardinality from an empty collection of hyperedges. " *
+            "Use `Hypergraph{M}(hyperedges, nvertices)` instead.",
+        ),
+    )
+    M = maximum(hyperedge -> length(Set(hyperedge)), hyperedges)
     return Hypergraph{M}(hyperedges, nvertices)
 end
 

@@ -18,22 +18,22 @@
     @test_throws ArgumentError Hypergraph{2}(edges, 4)
 
     # Non-Set input
-    @test_broken Hypergraph{3}([[1, 2], [2, 3]], 3) isa Hypergraph{3}
+    @test Hypergraph{3}([[1, 2], [2, 3]], 3).hyperedges == Set([Set([1, 2]), Set([2, 3])])
+    @test Hypergraph([(1, 2), (2, 3, 4)]) isa Hypergraph{3}
+    @test Hypergraph([[1, 2, 2], [2, 3]]) isa Hypergraph{2}    # repeated vertices
 
     # Stored hyperedges do not alias the input
-    S = Set([Set([1, 2])])
+    e = Set([1, 2])
+    S = Set([e])
     H = Hypergraph(S)
     push!(S, Set([7, 8, 9]))
-    @test_broken H.hyperedges == Set([Set([1, 2])])
+    push!(e, 3)
+    @test H.hyperedges == Set([Set([1, 2])])
 
     # Empty hyperedge set (max cardinality cannot be inferred)
     @test Hypergraph{2}(Set{Set{Int}}(), 3).nvertices == 3
-    @test_broken try
-        Hypergraph(Set{Set{Int}}(), 3)
-        false
-    catch err
-        err isa ArgumentError && occursin("Hypergraph{M}", sprint(showerror, err))
-    end
+    @test_throws "Hypergraph{M}" Hypergraph(Set{Set{Int}}(), 3)
+    @test_throws ArgumentError Hypergraph(Set{Set{Int}}())
 end
 
 @testitem "AdjacencyTensor" setup = [Reference] begin
