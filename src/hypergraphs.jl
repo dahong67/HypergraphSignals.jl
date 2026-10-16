@@ -44,8 +44,8 @@ Use `Hypergraph{M}(hyperedges, nvertices)` when `hyperedges` is empty.
 function Hypergraph(hyperedges, nvertices = maximum(maximum, hyperedges; init = 0))
     isempty(hyperedges) && throw(
         ArgumentError(
-            "Cannot infer the maximum cardinality from an empty collection of hyperedges. " *
-            "Use `Hypergraph{M}(hyperedges, nvertices)` instead.",
+            "Cannot infer the maximum cardinality from an empty collection of hyperedges. \
+            Use `Hypergraph{M}(hyperedges, nvertices)` instead.",
         ),
     )
     M = maximum(hyperedge -> length(Set(hyperedge)), hyperedges)

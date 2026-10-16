@@ -181,7 +181,6 @@
 
         flatten_D = reshape(D, flatten_shape_D)
 
-        n             = flatten_shape_D[1]
         flatten_V_fft = zeros(ComplexF64, flatten_shape_D)
         flatten_S_fft = zeros(ComplexF64, flatten_shape_D)
         flatten_Yt    = zeros(ComplexF64, flatten_shape_D)
