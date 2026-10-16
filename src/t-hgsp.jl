@@ -96,6 +96,10 @@ end
     hgsignalfit(X::Array{T,M}) where {T<:Real,M}
 
 Fit a hypergraph signal to the tensor `X`.
+
+Only `M <= 3` is currently supported.
+For `M = 3`, the signal is obtained from the leading eigenpair of the
+(symmetrized) `N × N` matrix `X[:, 1, :]`, so it is only determined up to sign.
 """
 function hgsignalfit(X::Array{T,M}) where {T<:Real,M}
     N = size(X, 1)
@@ -143,6 +147,9 @@ end
 
 Perform a t-HGSP shift of the `x` vector using the shift `A` tensor,
 then fit a hypergraph signal to the output tensor.
+
+Only `M <= 3` is currently supported (see `hgsignalfit`).
+For `M = 3`, the output signal is only determined up to sign.
 """
 function hgfilter(A::Array{T,M}, x::Vector{T}) where {T<:Real,M}
     # Perform t-HGSP shift
