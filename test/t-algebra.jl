@@ -110,20 +110,29 @@ end
             I in CartesianIndices(size(A)[3:end])
         )
 
-        # Real eigenvalues, sorted consistently across slices
-        @test_broken eltype(Λ) <: Real
+        # Real eigenvalues, sorted (ascending) in every slice
+        @test eltype(Λ) <: Real
+        @test all(
+            issorted(real(diag(Λh[:, :, I]))) for I in CartesianIndices(size(A)[3:end])
+        )
+
+        # Spatial-domain eigenvalue equation
+        @test tmul(A, V) ≈ tmul(V, Λ)
     end
+
+    # Complex t-self-adjoint tensors
+    B = randn(ComplexF64, 3, 3, 4)
+    A = B + tadjoint(B)
+    Λ, V = teigen(A)
+    @test eltype(Λ) <: Complex
+    @test tmul(A, V) ≈ tmul(V, Λ)
 
     # Frontal slices must be square
     @test_throws DimensionMismatch teigen(randn(2, 3, 4))
 
-    # Non-t-self-adjoint tensors are not supported
-    @test_broken try
-        teigen(randn(3, 3, 4))
-        false
-    catch err
-        err isa ArgumentError
-    end
+    # Non-t-self-adjoint tensors are not supported (yet)
+    @test_throws ArgumentError teigen(randn(3, 3, 4))
+    @test_throws ArgumentError teigen(randn(3, 3))
 
     # Matrices (M = 2)
     A = randn(3, 3)

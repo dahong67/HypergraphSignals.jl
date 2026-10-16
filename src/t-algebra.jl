@@ -81,14 +81,23 @@ end
 
 t-eigendecomposition of dense tensor `A` implemented via FFT.
 For matrices (`M = 2`), this is the usual eigendecomposition.
+
+Only t-self-adjoint tensors (i.e., `A == tadjoint(A)`) are currently supported,
+for which every Fourier-domain frontal slice is Hermitian.
+The eigenvalues of each slice are then real and sorted in ascending order,
+and the eigenvalue tensor `Λ` is real when `A` is real.
 """
 function teigen(A::Array{T,M}; eigenargs...) where {T,M}
     # Check dims
     size(A, 1) == size(A, 2) || throw(DimensionMismatch("size(A,1) must match size(A,2)"))
 
+    # Check t-self-adjointness
+    A == tadjoint(A) ||
+        throw(ArgumentError("teigen is not yet supported for non-t-self-adjoint tensors"))
+
     # Handle matrix case (no FFTs needed)
     if M == 2
-        E = eigen(A; eigenargs...)
+        E = eigen(Hermitian(A); eigenargs...)
         return Diagonal(E.values), E.vectors
     end
 
@@ -96,13 +105,16 @@ function teigen(A::Array{T,M}; eigenargs...) where {T,M}
     Ah = fft(A, 3:M)
 
     # Compute and stack slice-wise eigendecompositions
-    Eh = eigen!.(eachslice(Ah; dims = (3:M...,)); eigenargs...)
+    Eh = eigen!.(Hermitian.(eachslice(Ah; dims = (3:M...,))); eigenargs...)
     Λh = stack(Diagonal.(getproperty.(Eh, :values)))
     Vh = stack(getproperty.(Eh, :vectors))
 
-    # Compute IFFT
+    # Compute IFFT (and truncate eigenvalues to real if A is real)
     Λ = ifft(Λh, 3:M)
     V = ifft(Vh, 3:M)
+    if T <: Real
+        Λ = real(Λ)
+    end
 
     return Λ, V
 end
