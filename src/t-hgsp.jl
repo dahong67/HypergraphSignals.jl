@@ -107,7 +107,7 @@ function hgsignalfit(X::Array{T,M}) where {T<:Real,M}
     elseif M == 3    # reshaped matrix solved by eigen
         @warn "M = 3 solution has ambiguous sign"
         Xr = dropdims(X; dims = 2)
-        λ, V = eigen(Symmetric((Xr + Xr')/2))
+        λ, V = eigen!(Symmetric((Xr + Xr')/2))
         return sqrt(λ[end])*V[:, end]
     else             # M > 3 becomes a tensor eigenvalue problem
         error("M > 3 not supported (yet!)")

@@ -1,14 +1,21 @@
 module HypergraphSignals
 
+# Imports
 using Combinatorics: stirlings2
-using LinearAlgebra: eigen!, mul!, Diagonal, Symmetric
+using FFTW: fft, ifft
+using LinearAlgebra: Diagonal, Symmetric, eigen!, mul!
+
+# Hypergraph types
+include("hypergraphs.jl")
 export AdjacencyTensor, Hypergraph
-export tmul, tadjoint, teigen
-export hgsym, hgantisym, HGSignal, hgsignalfit, hgshift, hgfilter
+
+# t-algebra operations
+include("t-algebra.jl")
+export tadjoint, teigen, tmul
 public ⋆
 
-include("hypergraphs.jl")
-include("t-algebra.jl")
+# t-HGSP operations
 include("t-hgsp.jl")
+export HGSignal, hgantisym, hgfilter, hgshift, hgsignalfit, hgsym
 
 end
