@@ -42,9 +42,9 @@ end
 # As[dest_inds...] = view(A, src_inds...)
 
 """
-    hgantisym(A::Array{T,M}) where {T<:Real,M}
+    hgantisym(As::Array{T,M}) where {T<:Real,M}
 
-t-HGSP anti-symmetrization of dense tensor `A`.
+t-HGSP anti-symmetrization of dense tensor `As`.
 """
 function hgantisym(As::Array{T,M}) where {T<:Real,M}
     sz = ntuple(k -> k <= 2 ? size(As, k) : convert(Int, (size(As, k)-1)/2), Val(M))
