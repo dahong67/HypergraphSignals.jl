@@ -87,7 +87,7 @@ for which every Fourier-domain frontal slice is Hermitian.
 The eigenvalues of each slice are then real and sorted in ascending order,
 and the eigenvalue tensor `Λ` is real when `A` is real.
 """
-function teigen(A::Array{T,M}; eigenargs...) where {T,M}
+function teigen(A::Array{T,M}) where {T,M}
     # Check dims
     size(A, 1) == size(A, 2) || throw(DimensionMismatch("size(A,1) must match size(A,2)"))
 
@@ -97,7 +97,7 @@ function teigen(A::Array{T,M}; eigenargs...) where {T,M}
 
     # Handle matrix case (no FFTs needed)
     if M == 2
-        E = eigen(Hermitian(A); eigenargs...)
+        E = eigen(Hermitian(A))
         return Diagonal(E.values), E.vectors
     end
 
@@ -105,7 +105,7 @@ function teigen(A::Array{T,M}; eigenargs...) where {T,M}
     Ah = fft(A, 3:M)
 
     # Compute and stack slice-wise eigendecompositions
-    Eh = eigen!.(Hermitian.(eachslice(Ah; dims = (3:M...,))); eigenargs...)
+    Eh = eigen!.(Hermitian.(eachslice(Ah; dims = (3:M...,))))
     Λh = stack(Diagonal.(getproperty.(Eh, :values)))
     Vh = stack(getproperty.(Eh, :vectors))
 
