@@ -1,6 +1,6 @@
 # Reference implementations
 
-@testmodule Ref begin
+@testmodule Reference begin
     using Combinatorics: combinations, permutations, with_replacement_combinations
     using FFTW: fft, fft!, ifft
     using LinearAlgebra: Hermitian, I, diagm, eigen
@@ -179,7 +179,7 @@
             fft!(D, i)
         end
 
-        flatten_D = D
+        flatten_D = reshape(D, flatten_shape_D)
 
         n             = flatten_shape_D[1]
         flatten_V_fft = zeros(ComplexF64, flatten_shape_D)
@@ -259,6 +259,10 @@
             return Xt
         end
 
+        if ndims(A) == 2
+            return collect(A')
+        end
+
         if ndims(A) <= 3
             return tran(A)
         end
@@ -267,8 +271,10 @@
         sz2 = collect(sz)
         sz2[1], sz2[2] = sz[2], sz[1]
         At = zeros(ComplexF64, Tuple(sz2))
-        for i in 1:sz[end]
-            At[fill(:, ndims(A)-1)..., i] = tran(selectdim(A, ndims(A), i))
+        n = sz[end]
+        for i in 1:n
+            At[fill(:, ndims(A)-1)..., i] =
+                t_tran_jl(selectdim(A, ndims(A), mod(1 - i, n) + 1))
         end
         return At
     end

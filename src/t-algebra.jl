@@ -57,7 +57,6 @@ function tadjoint(A::Array{T,M}) where {T<:Real,M}
     return R
 end
 
-# TODO: does not agree with t_tran_jl for M >= 4, check if t_tran_jl correct
 # TODO: make this lazy instead like the usual transpose since we probably mostly
 #       need this for doing tmul, for which we could define the overload
 # TODO: note in devdocs that a nontrivial amount of the time is spent dealing
