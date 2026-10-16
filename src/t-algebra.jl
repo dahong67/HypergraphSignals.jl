@@ -1,16 +1,21 @@
 ## t-algebra operations
 
 """
-    tmul(A::Array{T,M}, B::Array{T,M}) where {T<:Real,M}
+    tmul(A::Array{TA,M}, B::Array{TB,M}) where {TA,TB,M}
 
 t-product of dense tensors `A` and `B` implemented via FFT.
+For matrices (`M = 2`), this is the usual matrix product.
+The output is real when both `A` and `B` are real.
 """
-function tmul(A::Array{T,M}, B::Array{T,M}) where {T<:Real,M}
+function tmul(A::Array{TA,M}, B::Array{TB,M}) where {TA,TB,M}
     # Check dims
     M >= 2 || throw(ArgumentError("number of dims must be at least two"))
     size(A, 2) == size(B, 1) || throw(DimensionMismatch("size(A,2) must match size(B,1)"))
     size(A)[3:M] == size(B)[3:M] ||
         throw(DimensionMismatch("size(A)[3:end] must match size(B)[3:end]"))
+
+    # Handle matrix case (no FFTs needed)
+    M == 2 && return A * B
 
     # Compute FFTs
     Ah = fft(A, 3:M)
@@ -23,8 +28,11 @@ function tmul(A::Array{T,M}, B::Array{T,M}) where {T<:Real,M}
         mul!(view(Ch, :, :, I), view(Ah, :, :, I), view(Bh, :, :, I))
     end
 
-    # Compute IFFT and truncate to real
-    C = real(ifft(Ch, 3:M))
+    # Compute IFFT (and truncate to real if inputs are real)
+    C = ifft(Ch, 3:M)
+    if TA <: Real && TB <: Real
+        C = real(C)
+    end
 
     return C
 end
@@ -42,11 +50,11 @@ const ⋆ = tmul
 # TODO: add note to devdocs about trying stack with eachslice and finding it was slower
 
 """
-    tadjoint(A::Array{T,M}) where {T<:Real,M}
+    tadjoint(A::Array{T,M}) where {T,M}
 
-t-algebra transpose of dense tensor `A`.
+t-algebra (conjugate) transpose of dense tensor `A`.
 """
-function tadjoint(A::Array{T,M}) where {T<:Real,M}
+function tadjoint(A::Array{T,M}) where {T,M}
     # Transpose each frontal slice
     P = PermutedDimsArray(A, (2, 1, 3:M...))
 
@@ -54,6 +62,9 @@ function tadjoint(A::Array{T,M}) where {T<:Real,M}
     # (corresponds to circshift + reverse)
     R = circshift(P, ntuple(k -> k <= 2 ? 0 : -1, Val(M)))
     reverse!(R; dims = (3:M...,))
+
+    # Conjugate (conj! is a no-op for AbstractArray{<:Real})
+    conj!(R)
 
     return R
 end
@@ -66,13 +77,20 @@ end
 #       defers that computation - we'd likely hit it soon after in an fft call.
 
 """
-    teigen(A::Array{T,M}) where {T<:Real,M}
+    teigen(A::Array{T,M}) where {T,M}
 
 t-eigendecomposition of dense tensor `A` implemented via FFT.
+For matrices (`M = 2`), this is the usual eigendecomposition.
 """
-function teigen(A::Array{T,M}; eigenargs...) where {T<:Real,M}
+function teigen(A::Array{T,M}; eigenargs...) where {T,M}
     # Check dims
     size(A, 1) == size(A, 2) || throw(DimensionMismatch("size(A,1) must match size(A,2)"))
+
+    # Handle matrix case (no FFTs needed)
+    if M == 2
+        E = eigen(A; eigenargs...)
+        return Diagonal(E.values), E.vectors
+    end
 
     # Compute FFT
     Ah = fft(A, 3:M)

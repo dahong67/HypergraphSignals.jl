@@ -4,12 +4,15 @@
     hgsym(A::Array{T,M}) where {T<:Real,M}
 
 t-HGSP symmetrization of dense tensor `A`.
+
+Note that this only performs a symmetric expansion of `A` along modes `3:M`,
+so the output may not be symmetric (e.g., when `A` is not symmetric along modes 1 and 2).
 """
 function hgsym(A::Array{T,M}) where {T<:Real,M}
     sz = size(A)
 
     # Initialize array with zeros
-    As = zeros(T, ntuple(k -> k <= 2 ? sz[k] : 2*sz[k]+1, Val(M)))
+    As = zeros(float(T), ntuple(k -> k <= 2 ? sz[k] : 2*sz[k]+1, Val(M)))
 
     # Copy in blocks and their reversed versions one at a time
     for I in CartesianIndices(ntuple(k -> k <= 2 ? 1 : 2, Val(M)))

@@ -4,7 +4,7 @@ module HypergraphSignals
 using Combinatorics: stirlings2
 using Compat: @compat
 using FFTW: fft, ifft
-using LinearAlgebra: Diagonal, Symmetric, eigen!, mul!
+using LinearAlgebra: Diagonal, Symmetric, eigen, eigen!, mul!
 
 # Hypergraph types
 include("hypergraphs.jl")

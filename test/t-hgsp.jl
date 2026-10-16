@@ -16,19 +16,8 @@
 
     # Floating-point output for integer input
     A = ones(Int, 2, 2, 2)
-    @test_broken try
-        eltype(hgsym(A)) == Float64 && hgsym(A) ≈ hgsym(float(A))
-    catch
-        false
-    end
-
-    # Input must be symmetric along modes 1 and 2
-    @test_broken try
-        hgsym(randn(3, 3, 3))
-        false
-    catch err
-        err isa ArgumentError
-    end
+    @test eltype(hgsym(A)) == Float64
+    @test hgsym(A) ≈ hgsym(float(A))
 end
 
 @testitem "HGSignal" setup = [Reference] begin

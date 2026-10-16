@@ -33,21 +33,18 @@
 
     # Matrices (M = 2)
     A, B = randn(2, 3), randn(3, 4)
-    @test_broken tmul(A, B) ≈ A * B
+    @test tmul(A, B) ≈ A * B
 
     # Mixed and complex element types
-    @test_broken try
-        tmul(ones(Int, 2, 2, 3), ones(2, 2, 3)) ≈ tmul(ones(2, 2, 3), ones(2, 2, 3))
-    catch
-        false
-    end
-    @test_broken try
-        Az, Bz = randn(ComplexF64, 2, 3, 4), randn(ComplexF64, 3, 2, 4)
-        Ch = fft(tmul(Az, Bz), 3)
-        Ah, Bh = fft(Az, 3), fft(Bz, 3)
-        all(Ch[:, :, k] ≈ Ah[:, :, k] * Bh[:, :, k] for k in 1:4)
-    catch
-        false
+    C = tmul(ones(Int, 2, 2, 3), ones(2, 2, 3))
+    @test C isa Array{Float64,3}
+    @test C ≈ tmul(ones(2, 2, 3), ones(2, 2, 3))
+    Az, Bz = randn(ComplexF64, 2, 3, 4), randn(ComplexF64, 3, 2, 4)
+    for (A, B) in [(Az, Bz), (real(Az), Bz), (Az, real(Bz))]
+        Cz = tmul(A, B)
+        @test Cz isa Array{ComplexF64,3}
+        Ch, Ah, Bh = fft(Cz, 3), fft(A, 3), fft(B, 3)
+        @test all(Ch[:, :, k] ≈ Ah[:, :, k] * Bh[:, :, k] for k in 1:4)
     end
 end
 
@@ -77,11 +74,12 @@ end
     end
 
     # Complex element types
-    @test_broken try
-        Az = randn(ComplexF64, 2, 3, 4)
-        tadjoint(Az) ≈ Reference.t_tran_jl(Az)
-    catch
-        false
+    for sz in [(2, 3), (2, 3, 4), (2, 3, 3, 4)]
+        Az = randn(ComplexF64, sz...)
+        Bz = randn(ComplexF64, sz[2], sz[1], sz[3:end]...)
+        @test tadjoint(Az) ≈ Reference.t_tran_jl(Az)
+        @test tadjoint(tadjoint(Az)) == Az
+        @test tadjoint(tmul(Az, Bz)) ≈ tmul(tadjoint(Bz), tadjoint(Az))
     end
 end
 
@@ -128,12 +126,8 @@ end
     end
 
     # Matrices (M = 2)
-    @test_broken try
-        A = randn(3, 3)
-        A = A + A'
-        Λ, V = teigen(A)
-        A * V ≈ V * Λ
-    catch
-        false
-    end
+    A = randn(3, 3)
+    A = A + A'
+    Λ, V = teigen(A)
+    @test A * V ≈ V * Λ
 end
