@@ -125,12 +125,12 @@ function hgsignalfit(X::Array{T,M}) where {T<:Real,M}
 end
 
 """
-    hgshift(A::Array{T,M}, x::Vector{T}) where {T<:Real,M}
+    hgshift(A::Array{TA,M}, x::Vector{Tx}) where {TA<:Real,Tx<:Real,M}
 
 Perform a t-HGSP shift of the `x` vector using the shift `A` tensor,
 returning the output tensor.
 """
-function hgshift(A::Array{T,M}, x::Vector{T}) where {T<:Real,M}
+function hgshift(A::Array{TA,M}, x::Vector{Tx}) where {TA<:Real,Tx<:Real,M}
     # Expand signal into full tensor
     X = Array(HGSignal(x, M))
 
@@ -143,7 +143,7 @@ function hgshift(A::Array{T,M}, x::Vector{T}) where {T<:Real,M}
 end
 
 """
-    hgfilter(A::Array{T,M}, x::Vector{T}) where {T<:Real,M}
+    hgfilter(A::Array{TA,M}, x::Vector{Tx}) where {TA<:Real,Tx<:Real,M}
 
 Perform a t-HGSP shift of the `x` vector using the shift `A` tensor,
 then fit a hypergraph signal to the output tensor.
@@ -151,7 +151,7 @@ then fit a hypergraph signal to the output tensor.
 Only `M <= 3` is currently supported (see `hgsignalfit`).
 For `M = 3`, the output signal is only determined up to sign.
 """
-function hgfilter(A::Array{T,M}, x::Vector{T}) where {T<:Real,M}
+function hgfilter(A::Array{TA,M}, x::Vector{Tx}) where {TA<:Real,Tx<:Real,M}
     # Perform t-HGSP shift
     Ys = hgshift(A, x)
 

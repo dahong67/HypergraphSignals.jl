@@ -64,4 +64,13 @@ end
     ŷ = @test_logs (:warn,) hgsignalfit(Reference.anti_symmetric_jl(Ys))
     @test y ≈ ŷ || y ≈ -ŷ    # roundoff differences can flip the eigenvector sign
     @test (@test_logs (:warn,) hgfilter(A, -x)) ≈ y    # shift is even in x
+
+    # Different eltypes for A and x
+    xi = [2, -1, 3, 1]
+    @test hgshift(A, xi) ≈ hgshift(A, float(xi))
+    @test (@test_logs (:warn,) hgfilter(A, xi)) ≈
+          (@test_logs (:warn,) hgfilter(A, float(xi)))
+    @test hgshift(Float32.(A), x) ≈ hgshift(A, x) rtol = 1e-5
+    y32 = @test_logs (:warn,) hgfilter(Float32.(A), x)
+    @test isapprox(y32, y; rtol = 1e-4) || isapprox(y32, -y; rtol = 1e-4)
 end
